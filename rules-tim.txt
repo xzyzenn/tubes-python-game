@@ -1,6 +1,6 @@
 Kerjain di branch sendiri, terus push:
 git push origin <nama-branch>
-contoh: push origin branch-George
+contoh: git push origin branch-George
 
 Sebelum mulai kerja:
 1. git pull origin main
