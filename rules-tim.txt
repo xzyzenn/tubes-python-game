@@ -1,0 +1,3 @@
+Sebelum mulai kerja: git pull
+
+Setelah selesai kerja: git add ., git commit -m "...", lalu git push
