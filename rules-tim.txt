@@ -5,3 +5,5 @@ Setelah selesai kerja:
 1. git add . (kalau mau update semua file) atau git add nama-file.py (kalau mau update file tertentu aja)
 2. git commit -m "kata-kata info commit apa aja dan untuk apa"
 3. git push origin main
+
+git status: buat cek status repo saat ini atau new update
