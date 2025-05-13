@@ -20,12 +20,12 @@ class Enemy(pg.sprite.Sprite):
     self.rotate()
 
   def move(self):
-    #define a target waypoint
+    #mendefenisikan target waypoint
     if self.target_waypoints < len(self.waypoints):
       self.target = Vector2(self.waypoints[self.target_waypoints])
       self.movement = self.target - self.pos
     else:
-      #musuh telah mencapai jalur akhir
+      #musuh telah mencapai akhir waypoint
       self.kill()
 
     #kalkulasi jarak ke target

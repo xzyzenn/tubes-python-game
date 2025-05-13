@@ -8,14 +8,14 @@ pg.init()
 #buat waktu
 clock = pg.time.Clock()
 
-#buat game window
+#game window/display
 screen = pg.display.set_mode((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
 pg.display.set_caption ("Tower Defense")
 
-#menyimpan gambar
+#gambar musuh
 enemy_image = pg.image.load('assets/images/enemies/enemy_1.png').convert_alpha()
 
-#buat grup
+#grup musuh
 enemy_group = pg.sprite.Group()
 
 waypoints = [
@@ -37,7 +37,7 @@ while run:
   screen.fill("grey100")
 
   #gambar jalur enemy
-  pg.draw.lines(screen, "grey0", False, waypoints)
+  pg.draw.lines(screen, "red", False, waypoints)
 
   #update grup
   enemy_group.update()
