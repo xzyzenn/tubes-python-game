@@ -1,13 +1,57 @@
-Kerjain di branch sendiri, terus push:
+LANGKAH-LANGKAH PENGERJAAN:
+
+Sebelum mulai kerja: Pull dari main
+Saat kerja:
+1. Bikin branch baru
+    Wajib. Setiap tugas yang berbeda, khususnya ngerjain 1 file, kerjain di branch itu
+    Alasannya:
+    - Biar George gampang merge pull requestnya
+    - GitHub Rapi
+    - Branch 'main' gak keotak-atik langsung (biar tetap aman)
+    - File-file atau tugas-tugas yang udah kalian pull request dan udah di merge oleh George tetap aman dan kekontrol
+      Karena GitHub merge 1 branch, bukan per-commit, jadi gak bisa cherry pick
+      Artinya kalau kalian buat perubahan di file yang sebelumnya saat lagi ngerjain file baru, branc main juga berubah, masalahnya gak bisa dideteksi
+      Jadi biar aman, kerjain tugas yang berbeda di branch yang berbeda
+2. Kerjain tugas di dalam branch itu
+3. Commit
+    Ingat selalu commit kerjaan kalian kalau dirasa udah panjang, mau close/udahan tapi tugas belum selesai, dan paling penting: setiap 1 file udah selesai (semisal di 1 branch mau ngerjain lebih dari 1 file)
+    Biar kalau ada masalah pas di setelah di merge, picking commit yang penting jadi gampang
+4. Push ke branch itu
+    Jangan push ke origin main
+5. Pull request ke main (di GitHub)
+6. George merge pull request
+    Keuntungan kalo kalian pakai branch, George ceknya to-the-point dan gak takut ada perubahan di file yang lain selain file yang di branch baru itu
+    Terus George juga bisa cherry pick kalau semisal ada file yang salah atau gak mau ambil semua commit
+
+
+INSTRUKSI-INSTRUKSI PENTING:
+
+git checkout -b nama_branch
+-> buat branch baru terus langsung masuk ke dalam branch tersebut
+
+git checkout nama_branch
+-> pindah branch
+
+git status
+-> buat liat sekarang lagi di branch apa
+
 git push origin <nama-branch>
-contoh: git push origin branch-George
+-> contoh: git push origin branch-George
 
-Sebelum mulai kerja:
-1. git pull origin main
+git pull origin main
+-> buat upadte repo kalian
 
-Setelah selesai kerja:
-1. git add . (kalau mau update semua file) atau git add nama-file.py (kalau mau update file tertentu aja)
-2. git commit -m "kata-kata info commit apa aja dan untuk apa"
-3. git push origin main
+git add .
+-> kalau mau update semua file
 
-git status: buat cek status repo saat ini atau new update
+git add file-python.py
+-> kalau mau update file tertentu aja
+
+git commit -m "kata-kata info commit apa aja dan untuk apa"
+-> buat nyimpen progress, sama kaya save
+
+git push origin nama_branch
+-> buat push pekerjaan kita ke branch
+
+git status
+-> buat cek status repo saat ini atau new update
