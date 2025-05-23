@@ -42,10 +42,10 @@ git pull origin main
 -> buat upadte repo kalian
 
 git add .
--> kalau mau update semua file
+-> kalau mau save semua file/perubahan sekaligus
 
 git add file-python.py
--> kalau mau update file tertentu aja
+-> kalau mau save file tertentu aja
 
 git commit -m "kata-kata info commit apa aja dan untuk apa"
 -> buat nyimpen progress, sama kaya save
