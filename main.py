@@ -30,7 +30,7 @@ map_image = pg.image.load('levels/level.png').convert_alpha()
 #turret spritesheets
 turret_spritesheets = []
 for x in range(1, c.TURRET_LEVELS + 1):
-  turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}.png').convert_alpha()
+  turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}/turret_{x}_basic/turret_sprite_{x}.png').convert_alpha()
   turret_spritesheets.append(turret_sheet)
 #individual turret image for mouse cursor
 cursor_turret = pg.image.load('assets/images/turrets/cursor_turret.png').convert_alpha()
