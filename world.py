@@ -9,7 +9,6 @@ class World():
     self.game_speed = 1
     self.health = c.HEALTH
     self.money = c.MONEY
-    self.tile_map = []
     self.waypoints = []
     self.level_data = data
     self.image = map_image
@@ -21,9 +20,7 @@ class World():
   def process_data(self):
     #look through data to extract relevant info
     for layer in self.level_data["layers"]:
-      if layer["name"] == "tilemap":
-        self.tile_map = layer["data"]
-      elif layer["name"] == "waypoints":
+      if layer["name"] == "waypoints":
         for obj in layer["objects"]:
           waypoint_data = obj["polyline"]
           self.process_waypoints(waypoint_data)

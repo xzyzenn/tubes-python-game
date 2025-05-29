@@ -30,17 +30,25 @@ map_image = pg.image.load('levels/level.png').convert_alpha()
 #turret spritesheets
 turret_spritesheets = []
 for x in range(1, c.TURRET_LEVELS + 1):
-  turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}/turret_{x}_basic/turret_sprite_{x}.png').convert_alpha()
+  turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}/{3}.png').convert_alpha()
   turret_spritesheets.append(turret_sheet)
 #individual turret image for mouse cursor
 cursor_turret = pg.image.load('assets/images/turrets/cursor_turret.png').convert_alpha()
 #enemies
 enemy_images = {
-  "weak": pg.image.load('assets/images/enemies/enemy_1.png').convert_alpha(),
-  "medium": pg.image.load('assets/images/enemies/enemy_2.png').convert_alpha(),
-  "strong": pg.image.load('assets/images/enemies/enemy_3.png').convert_alpha(),
-  "elite": pg.image.load('assets/images/enemies/enemy_4.png').convert_alpha()
+  "weak": [],
+  "medium": [],
+  "strong": []
 }
+for i in range(c.ENEMY_FRAMES):
+  weak_img = pg.image.load(f'assets/images/enemies/enemy_1/Walking/1_Zombie_Villager_Walking_{i}.png').convert_alpha()
+  medium_img = pg.image.load(f'assets/images/enemies/enemy_2/Walking/2_Zombie_Villager_Walking_{i}.png').convert_alpha()
+  strong_img = pg.image.load(f'assets/images/enemies/enemy_3/Walking/3_Zombie_Villager_Walking_{i}.png').convert_alpha()
+
+  enemy_images["weak"].append(weak_img)
+  enemy_images["medium"].append(medium_img)
+  enemy_images["strong"].append(strong_img)
+
 #buttons
 buy_turret_image = pg.image.load('assets/images/buttons/buy_turret.png').convert_alpha()
 cancel_image = pg.image.load('assets/images/buttons/cancel.png').convert_alpha()
@@ -88,8 +96,7 @@ def create_turret(mouse_pos):
   mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
   #calculate the sequential number of the tile
   mouse_tile_num = (mouse_tile_y * c.COLS) + mouse_tile_x
-  #check if that tile is grass
-  if world.tile_map[mouse_tile_num] == 7:
+  if True:
     #check that there isn't already a turret there
     space_is_free = True
     for turret in turret_group:
@@ -186,7 +193,7 @@ while run:
       if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
         if world.spawned_enemies < len(world.enemy_list):
           enemy_type = world.enemy_list[world.spawned_enemies]
-          enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+          enemy = Enemy(enemy_type, enemy_images)
           enemy_group.add(enemy)
           world.spawned_enemies += 1
           last_enemy_spawn = pg.time.get_ticks()

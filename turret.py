@@ -113,9 +113,9 @@ class Turret(pg.sprite.Sprite):
     self.range_rect.center = self.rect.center
 
   def draw(self, surface):
-    self.image = pg.transform.rotate(self.original_image, self.angle - 90)
+    self.image = self.original_image
     self.rect = self.image.get_rect()
     self.rect.center = (self.x, self.y)
     surface.blit(self.image, self.rect)
     if self.selected:
-      surface.blit(self.range_image, self.range_rect)
+        surface.blit(self.range_image, self.range_rect)
