@@ -94,20 +94,31 @@ def display_data():
 def create_turret(mouse_pos):
   mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
   mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
-  #calculate the sequential number of the tile
-  mouse_tile_num = (mouse_tile_y * c.COLS) + mouse_tile_x
+  # Periksa apakah posisi mouse berada dalam batas layar game area
+  if mouse_tile_x < 0 or mouse_tile_x >= c.COLS or mouse_tile_y < 0 or mouse_tile_y >= c.ROWS:
+    return False # Jika di luar area game, jangan lakukan apa-apa
   if True:
     #check that there isn't already a turret there
     space_is_free = True
     for turret in turret_group:
+      # Check if the exact tile is occupied
       if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
         space_is_free = False
+        break # Keluar dari loop jika sudah ditemukan turret di lokasi yang sama
+        # Check for horizontal adjacency (1 tile gap)
+      if mouse_tile_y == turret.tile_y: # Only check if they are on the same row
+        if abs(mouse_tile_x - turret.tile_x) <= 1: # If the horizontal distance is 0 or 1
+          space_is_free = False
+          break # Keluar dari loop jika terlalu dekat secara horizontal
+
     #if it is a free space then create turret
     if space_is_free == True:
       new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y, shot_fx)
       turret_group.add(new_turret)
       #deduct cost of turret
       world.money -= c.BUY_COST
+      return True # Turret berhasil dibuat
+  return False # Turret tidak dibuat (misalnya karena lokasi tidak valid atau ada turret lain di dekatnya)
 
 def select_turret(mouse_pos):
   mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
