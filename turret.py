@@ -66,7 +66,7 @@ class Turret(pg.sprite.Sprite):
                                self.ellipse_width, self.ellipse_height)
         pg.draw.ellipse(self.range_image, (255, 0, 0), ellipse_rect)
 
-        self.range_image.set_alpha(70)
+        self.range_image.set_alpha(20)
         self.range_rect = self.range_image.get_rect()
         # Position the range_rect relative to the turret's center, with an offset
         self.range_rect.center = (self.rect.centerx, self.rect.centery + self.ellipse_height // 3)
@@ -179,7 +179,7 @@ class Turret(pg.sprite.Sprite):
                                self.ellipse_width, self.ellipse_height)
         pg.draw.ellipse(self.range_image, (255, 0, 0), ellipse_rect)
 
-        self.range_image.set_alpha(70)
+        self.range_image.set_alpha(20)
         self.range_rect = self.range_image.get_rect()
         # Position the range_rect relative to the turret's center, with an offset
         self.range_rect.center = (self.rect.centerx, self.rect.centery + self.ellipse_height // 3) # Consistent offset

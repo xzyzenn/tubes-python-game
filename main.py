@@ -36,18 +36,38 @@ for x in range(1, c.TURRET_LEVELS + 1):
 cursor_turret = pg.image.load('assets/images/turrets/cursor_turret.png').convert_alpha()
 #enemies
 enemy_images = {
-  "weak": [],
-  "medium": [],
-  "strong": []
+  "weak": { "walking": [], "dying": [], "slashing": [] },
+  "medium": { "walking": [], "dying": [], "slashing": [] },
+  "strong": { "walking": [], "dying": [], "slashing": [] }
 }
-for i in range(c.ENEMY_FRAMES):
-  weak_img = pg.image.load(f'assets/images/enemies/enemy_1/Walking/1_Zombie_Villager_Walking_{i}.png').convert_alpha()
-  medium_img = pg.image.load(f'assets/images/enemies/enemy_2/Walking/2_Zombie_Villager_Walking_{i}.png').convert_alpha()
-  strong_img = pg.image.load(f'assets/images/enemies/enemy_3/Walking/3_Zombie_Villager_Walking_{i}.png').convert_alpha()
 
-  enemy_images["weak"].append(weak_img)
-  enemy_images["medium"].append(medium_img)
-  enemy_images["strong"].append(strong_img)
+# Define a helper function to load animations for each enemy type
+def load_enemy_animations(enemy_type_key, folder_prefix, num_walking_frames, num_dying_frames, num_slashing_frames):
+    # Determine the numerical prefix for the image files
+    file_prefix_num = ""
+    if enemy_type_key == "weak":
+        file_prefix_num = "1"
+    elif enemy_type_key == "medium":
+        file_prefix_num = "2"
+    elif enemy_type_key == "strong":
+        file_prefix_num = "3"
+
+    for i in range(num_walking_frames):
+        img = pg.image.load(f'assets/images/enemies/{folder_prefix}/Walking/{file_prefix_num}_Zombie_Villager_Walking_{i}.png').convert_alpha()
+        enemy_images[enemy_type_key]["walking"].append(img)
+    for i in range(num_dying_frames):
+        img = pg.image.load(f'assets/images/enemies/{folder_prefix}/Dying/{file_prefix_num}_Zombie_Villager_Dying_{i}.png').convert_alpha()
+        enemy_images[enemy_type_key]["dying"].append(img)
+    for i in range(num_slashing_frames):
+        img = pg.image.load(f'assets/images/enemies/{folder_prefix}/Slashing/{file_prefix_num}_Zombie_Villager_Slashing_{i}.png').convert_alpha()
+        enemy_images[enemy_type_key]["slashing"].append(img)
+
+# Load animations for each enemy type with their specific frame counts
+# YOU MUST CHANGE THESE TO YOUR ACTUAL FRAME COUNTS IF THEY ARE DIFFERENT
+load_enemy_animations("weak", "enemy_1", 24, 10, 8) # Example: 24 walking, 10 dying, 8 slashing
+load_enemy_animations("medium", "enemy_2", 24, 12, 10) # Example: 24 walking, 12 dying, 10 slashing
+load_enemy_animations("strong", "enemy_3", 24, 15, 12) # Example: 24 walking, 15 dying, 12 slashing
+
 
 #buttons
 buy_turret_image = pg.image.load('assets/images/buttons/buy_turret.png').convert_alpha()
@@ -169,7 +189,7 @@ while run:
       game_outcome = 1 #win
 
     #update groups
-    enemy_group.update(world)
+    enemy_group.update(world, turret_group) # Pass turret_group to enemy for slashing logic
     turret_group.update(enemy_group, world)
 
     #highlight selected turret
