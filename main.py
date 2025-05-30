@@ -184,13 +184,12 @@ while run:
   world.draw(screen)
 
   #draw groups
+  for turret in turret_group:
+    turret.draw(screen)
+
   enemy_group.draw(screen)
   for enemy in enemy_group:
     enemy.draw_health_bar(screen)
-
-  for turret in turret_group:
-    turret.draw(screen)
-    # turret.draw_health_bar(screen) : tampilan hp bar turret permanen
   
   display_data()
 

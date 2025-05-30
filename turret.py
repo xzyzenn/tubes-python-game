@@ -43,11 +43,32 @@ class Turret(pg.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = (self.x, self.y)
 
-    #create transparent circle showing range
-    self.range_image = pg.Surface((self.range * 2, self.range * 2))
+    #create transparent oval showing range
+    self.ellipse_width_factor = 2.5
+    self.ellipse_height_factor = 1.0
+
+    self.ellipse_width = int(self.range * self.ellipse_width_factor)
+    self.ellipse_height = int(self.range * self.ellipse_height_factor)
+    self.y_offset_oval = int(self.range * 0.4)
+
+    surface_width = max(self.range * 2, self.ellipse_width + 20)
+    surface_height = max(self.range * 2, self.ellipse_height + self.y_offset_oval + 20)
+
+    surface_width = max(self.range * 2, self.ellipse_width + 20)
+    surface_height = max(self.range * 2, self.ellipse_height + self.y_offset_oval + 20)
+
+    self.range_image = pg.Surface((surface_width, surface_height))
     self.range_image.fill((0, 0, 0))
     self.range_image.set_colorkey((0, 0, 0))
-    pg.draw.circle(self.range_image, (255, 0, 0), (self.range, self.range), self.range)
+
+    ellipse_x_center_on_surface = surface_width // 2
+    ellipse_y_center_on_surface = (surface_height // 2) + self.y_offset_oval
+
+    ellipse_rect = pg.Rect(ellipse_x_center_on_surface - self.ellipse_width // 2,
+                           ellipse_y_center_on_surface - self.ellipse_height // 2,
+                           self.ellipse_width, self.ellipse_height)
+    pg.draw.ellipse(self.range_image, (255, 0, 0), ellipse_rect)
+
     self.range_image.set_alpha(70)
     self.range_rect = self.range_image.get_rect()
     self.range_rect.center = self.rect.center
@@ -77,14 +98,17 @@ class Turret(pg.sprite.Sprite):
     # Periksa musuh yang berada dalam range dan serang turret
     for enemy in enemy_group:
         if enemy.health > 0:
-            x_dist = enemy.pos[0] - self.x
-            y_dist = enemy.pos[1] - self.y
-            dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
-            if dist < self.range: # Jika musuh dalam jangkauan turret
-                # Turret bisa diserang jika sudah cooldown dari damage sebelumnya
-                if pg.time.get_ticks() - self.last_damaged > self.damage_cooldown:
-                    self.health -= ENEMY_DATA[enemy.enemy_type]["damage"] # Turret menerima damage
-                    self.last_damaged = pg.time.get_ticks()
+            rel_x = enemy.pos[0] - self.x
+            rel_y = enemy.pos[1] - (self.y + self.y_offset_oval)
+
+            half_width = self.ellipse_width / 2
+            half_height = self.ellipse_height / 2
+
+            if half_width > 0 and half_height > 0:
+                if (rel_x / half_width)**2 + (rel_y / half_height)**2 <= 1:
+                  if pg.time.get_ticks() - self.last_damaged > self.damage_cooldown:
+                        self.health -= ENEMY_DATA[enemy.enemy_type]["damage"] # Turret menerima damage
+                        self.last_damaged = pg.time.get_ticks()
 
   def pick_target(self, enemy_group):
     #find an enemy to target
@@ -93,16 +117,19 @@ class Turret(pg.sprite.Sprite):
     #check distance to each enemy to see if it is in range
     for enemy in enemy_group:
       if enemy.health > 0:
-        x_dist = enemy.pos[0] - self.x
-        y_dist = enemy.pos[1] - self.y
-        dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
-        if dist < self.range:
-          self.target = enemy
-          self.angle = math.degrees(math.atan2(-y_dist, x_dist))
-          #damage enemy
-          self.target.health -= c.DAMAGE
-          self.shot_fx.play()
-          break
+        rel_x = enemy.pos[0] - self.x
+        rel_y = enemy.pos[1] - (self.y + self.y_offset_oval)
+
+        half_width = self.ellipse_width / 2
+        half_height = self.ellipse_height / 2
+
+        if half_width > 0 and half_height > 0:
+          if (rel_x / half_width)**2 + (rel_y / half_height)**2 <= 1:
+                self.target = enemy
+                self.angle = math.degrees(math.atan2(-rel_y, rel_x))
+                self.target.health -= c.DAMAGE
+                self.shot_fx.play()
+                break
 
   def play_animation(self):
     #update image
@@ -126,22 +153,36 @@ class Turret(pg.sprite.Sprite):
     self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
     self.original_image = self.animation_list[self.frame_index]
 
-    #upgrade range circle
-    self.range_image = pg.Surface((self.range * 2, self.range * 2))
+    #upgrade range oval
+    self.ellipse_width = int(self.range * self.ellipse_width_factor)
+    self.ellipse_height = int(self.range * self.ellipse_height_factor)
+    self.y_offset_oval = int(self.range * 0.4)
+
+    surface_width = max(self.range * 2, self.ellipse_width + 20)
+    surface_height = max(self.range * 2, self.ellipse_height + self.y_offset_oval + 20)
+
+    self.range_image = pg.Surface((surface_width, surface_height))
     self.range_image.fill((0, 0, 0))
     self.range_image.set_colorkey((0, 0, 0))
-    pg.draw.circle(self.range_image, (255, 0, 0), (self.range, self.range), self.range)
+
+    ellipse_x_center_on_surface = surface_width // 2
+    ellipse_y_center_on_surface = (surface_height // 2) + self.y_offset_oval
+
+    ellipse_rect = pg.Rect(ellipse_x_center_on_surface - self.ellipse_width // 2,
+                           ellipse_y_center_on_surface - self.ellipse_height // 2,
+                           self.ellipse_width, self.ellipse_height)
+    pg.draw.ellipse(self.range_image, (255, 0, 0), ellipse_rect)
+
     self.range_image.set_alpha(70)
     self.range_rect = self.range_image.get_rect()
     self.range_rect.center = self.rect.center
 
   def draw(self, surface):
+    surface.blit(self.range_image, self.range_rect)
     self.image = self.original_image
     self.rect = self.image.get_rect()
     self.rect.center = (self.x, self.y)
     surface.blit(self.image, self.rect)
-    if self.selected:
-        surface.blit(self.range_image, self.range_rect)
     self.draw_health_bar(surface)
 
   def draw_health_bar(self, surface):
