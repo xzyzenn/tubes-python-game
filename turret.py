@@ -2,6 +2,7 @@ import pygame as pg
 import math
 import constants as c
 from turret_data import TURRET_DATA
+from enemy_data import ENEMY_DATA
 
 class Turret(pg.sprite.Sprite):
   def __init__(self, sprite_sheets, tile_x, tile_y, shot_fx):
@@ -9,9 +10,16 @@ class Turret(pg.sprite.Sprite):
     self.upgrade_level = 1
     self.range = TURRET_DATA[self.upgrade_level - 1].get("range")
     self.cooldown = TURRET_DATA[self.upgrade_level - 1].get("cooldown")
+    self.damage = TURRET_DATA[self.upgrade_level - 1].get("damage")
     self.last_shot = pg.time.get_ticks()
     self.selected = False
     self.target = None
+    self.health = 100
+    self.max_health = 100
+
+    # Waktu terakhir turret terkena damage, untuk cooldown damage dari enemy
+    self.last_damaged = pg.time.get_ticks()
+    self.damage_cooldown = 500 # Turret bisa terkena damage setiap 0.5 detik
 
     #position variables
     self.tile_x = tile_x
@@ -39,8 +47,8 @@ class Turret(pg.sprite.Sprite):
     self.range_image = pg.Surface((self.range * 2, self.range * 2))
     self.range_image.fill((0, 0, 0))
     self.range_image.set_colorkey((0, 0, 0))
-    pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
-    self.range_image.set_alpha(100)
+    pg.draw.circle(self.range_image, (255, 0, 0), (self.range, self.range), self.range)
+    self.range_image.set_alpha(70)
     self.range_rect = self.range_image.get_rect()
     self.range_rect.center = self.rect.center
 
@@ -54,6 +62,10 @@ class Turret(pg.sprite.Sprite):
     return animation_list
 
   def update(self, enemy_group, world):
+    # Cek HP turret
+    if self.health <= 0:
+        self.kill() # Hapus turret jika HP <= 0
+
     #if target picked, play firing animation
     if self.target:
       self.play_animation()
@@ -61,6 +73,18 @@ class Turret(pg.sprite.Sprite):
       #search for new target once turret has cooled down
       if pg.time.get_ticks() - self.last_shot > (self.cooldown / world.game_speed):
         self.pick_target(enemy_group)
+
+    # Periksa musuh yang berada dalam range dan serang turret
+    for enemy in enemy_group:
+        if enemy.health > 0:
+            x_dist = enemy.pos[0] - self.x
+            y_dist = enemy.pos[1] - self.y
+            dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
+            if dist < self.range: # Jika musuh dalam jangkauan turret
+                # Turret bisa diserang jika sudah cooldown dari damage sebelumnya
+                if pg.time.get_ticks() - self.last_damaged > self.damage_cooldown:
+                    self.health -= ENEMY_DATA[enemy.enemy_type]["damage"] # Turret menerima damage
+                    self.last_damaged = pg.time.get_ticks()
 
   def pick_target(self, enemy_group):
     #find an enemy to target
@@ -77,7 +101,6 @@ class Turret(pg.sprite.Sprite):
           self.angle = math.degrees(math.atan2(-y_dist, x_dist))
           #damage enemy
           self.target.health -= c.DAMAGE
-          #play sound effect
           self.shot_fx.play()
           break
 
@@ -99,7 +122,7 @@ class Turret(pg.sprite.Sprite):
     self.upgrade_level += 1
     self.range = TURRET_DATA[self.upgrade_level - 1].get("range")
     self.cooldown = TURRET_DATA[self.upgrade_level - 1].get("cooldown")
-    #upgrade turret image
+    self.damage = TURRET_DATA[self.upgrade_level - 1].get("damage")
     self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
     self.original_image = self.animation_list[self.frame_index]
 
@@ -107,8 +130,8 @@ class Turret(pg.sprite.Sprite):
     self.range_image = pg.Surface((self.range * 2, self.range * 2))
     self.range_image.fill((0, 0, 0))
     self.range_image.set_colorkey((0, 0, 0))
-    pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
-    self.range_image.set_alpha(100)
+    pg.draw.circle(self.range_image, (255, 0, 0), (self.range, self.range), self.range)
+    self.range_image.set_alpha(70)
     self.range_rect = self.range_image.get_rect()
     self.range_rect.center = self.rect.center
 
@@ -119,3 +142,18 @@ class Turret(pg.sprite.Sprite):
     surface.blit(self.image, self.rect)
     if self.selected:
         surface.blit(self.range_image, self.range_rect)
+    self.draw_health_bar(surface)
+
+  def draw_health_bar(self, surface):
+    # Hitung rasio HP saat ini
+    health_ratio = self.health / self.max_health
+    # Tentukan dimensi bar HP
+    bar_width = self.rect.width * 0.8
+    bar_height = 5
+    bar_x = self.rect.centerx - (bar_width / 2)
+    bar_y = self.rect.top - bar_height - 5 # Posisikan di atas turret
+
+    # Gambar background bar (abu-abu gelap)
+    pg.draw.rect(surface, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height))
+    # Gambar foreground bar (hijau)
+    pg.draw.rect(surface, (0, 255, 0), (bar_x, bar_y, bar_width * health_ratio, bar_height))
