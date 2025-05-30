@@ -1,3 +1,4 @@
+# enemy_data.py
 ENEMY_SPAWN_DATA = [
   {
     #1
@@ -110,21 +111,25 @@ ENEMY_DATA = {
     "weak": {
     "health": 100,
     "speed": 2,
-    "damage": 5
+    "damage": 5,
+    "attack_cooldown": 1000 # Contoh: serang setiap 1 detik
   },
     "medium": {
     "health": 150,
     "speed": 3,
-    "damage": 8
+    "damage": 8,
+    "attack_cooldown": 1200 # Contoh: serang setiap 1.2 detik
   },
     "strong": {
     "health": 200,
     "speed": 4,
-    "damage": 10
+    "damage": 10,
+    "attack_cooldown": 1500 # Contoh: serang setiap 1.5 detik
   },
     "elite": {
     "health": 300,
     "speed": 6,
-    "damage": 15
+    "damage": 15,
+    "attack_cooldown": 800 # Contoh: serang setiap 0.8 detik
   }
 }

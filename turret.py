@@ -1,8 +1,9 @@
+# turret.py
 import pygame as pg
 import math
 import constants as c
 from turret_data import TURRET_DATA
-from enemy_data import ENEMY_DATA
+from enemy_data import ENEMY_DATA # Keep this import for range calculation, but enemy applies damage
 
 class Turret(pg.sprite.Sprite):
     def __init__(self, sprite_sheets, tile_x, tile_y, shot_fx):
@@ -18,8 +19,9 @@ class Turret(pg.sprite.Sprite):
         self.max_health = 100
 
         # Waktu terakhir turret terkena damage, untuk cooldown damage dari enemy
-        self.last_damaged = pg.time.get_ticks()
-        self.damage_cooldown = 500 # Turret bisa terkena damage setiap 0.5 detik
+        # Ini akan dihapus karena damage akan dikelola oleh Enemy
+        # self.last_damaged = pg.time.get_ticks()
+        # self.damage_cooldown = 500 # Turret bisa terkena damage setiap 0.5 detik
 
         #position variables
         self.tile_x = tile_x
@@ -99,22 +101,23 @@ class Turret(pg.sprite.Sprite):
             if pg.time.get_ticks() - self.last_shot > (self.cooldown / world.game_speed):
                 self.pick_target(enemy_group)
 
-        # Periksa musuh yang berada dalam range dan serang turret
-        for enemy in enemy_group:
-            if enemy.health > 0:
-                # Calculate relative position of enemy to the *ellipse's center*, using enemy's feet
-                rel_x = enemy.pos[0] - self.attack_origin_x
-                rel_y = enemy.rect.bottom - self.attack_origin_y
+        # THE SECTION BELOW IS REMOVED AS ENEMY WILL HANDLE DAMAGE TO TURRET
+        # # Periksa musuh yang berada dalam range dan serang turret
+        # for enemy in enemy_group:
+        #     if enemy.health > 0:
+        #         # Calculate relative position of enemy to the *ellipse's center*, using enemy's feet
+        #         rel_x = enemy.pos[0] - self.attack_origin_x
+        #         rel_y = enemy.rect.bottom - self.attack_origin_y
 
-                half_width = self.ellipse_width / 2
-                half_height = self.ellipse_height / 2
+        #         half_width = self.ellipse_width / 2
+        #         half_height = self.ellipse_height / 2
 
-                if half_width > 0 and half_height > 0:
-                    # Check if enemy is within the ellipse
-                    if (rel_x / half_width)**2 + (rel_y / half_height)**2 <= 1:
-                        if pg.time.get_ticks() - self.last_damaged > self.damage_cooldown:
-                            self.health -= ENEMY_DATA[enemy.enemy_type]["damage"] # Turret menerima damage
-                            self.last_damaged = pg.time.get_ticks()
+        #         if half_width > 0 and half_height > 0:
+        #             # Check if enemy is within the ellipse
+        #             if (rel_x / half_width)**2 + (rel_y / half_height)**2 <= 1:
+        #                 if pg.time.get_ticks() - self.last_damaged > self.damage_cooldown:
+        #                     self.health -= ENEMY_DATA[enemy.enemy_type]["damage"] # Turret menerima damage
+        #                     self.last_damaged = pg.time.get_ticks()
 
     def pick_target(self, enemy_group):
         #find an enemy to target

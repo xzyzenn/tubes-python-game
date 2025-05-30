@@ -16,6 +16,8 @@ class Enemy(pg.sprite.Sprite):
         self.speed = ENEMY_DATA.get(enemy_type)["speed"]
         self.health = ENEMY_DATA.get(enemy_type)["health"]
         self.max_health = ENEMY_DATA.get(enemy_type)["health"]
+        self.attack_cooldown = ENEMY_DATA.get(enemy_type)["attack_cooldown"] # New: enemy's attack cooldown
+        self.last_attack = pg.time.get_ticks() # New: last time enemy attacked
 
         self.images = images.get(enemy_type)
         self.animation_type = "walking" # New: current animation state
@@ -36,10 +38,11 @@ class Enemy(pg.sprite.Sprite):
             if self.slashing_turret and self.slashing_turret.health > 0: # Only slash if turret is alive
                 self.animation_type = "slashing"
                 self.animate(0.15) # Slashing animation speed
-                # Damage the turret at a certain frame or over time during slashing animation
-                # For simplicity, let's assume damage occurs continuously while slashing
-                # You might want to implement a cooldown for enemy attacks similar to turrets
-                self.slashing_turret.health -= ENEMY_DATA[self.enemy_type]["damage"] # Turret receives damage
+                
+                # Apply damage to turret only if attack cooldown is met
+                if pg.time.get_ticks() - self.last_attack > self.attack_cooldown: # New condition
+                    self.slashing_turret.health -= ENEMY_DATA[self.enemy_type]["damage"] # Turret menerima damage
+                    self.last_attack = pg.time.get_ticks() # Reset cooldown
             else:
                 self.animation_type = "walking"
                 self.animate(0.15) # Walking animation speed
@@ -50,6 +53,8 @@ class Enemy(pg.sprite.Sprite):
             if pg.time.get_ticks() - self.dying_animation_start_time > 2000: # 2-second delay
                 self.kill()
 
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
 
     def animate(self, speed_factor):
         current_images = self.images[self.animation_type]
@@ -93,7 +98,7 @@ class Enemy(pg.sprite.Sprite):
 
     def check_for_turret_collision(self, turret_group):
         # Only check for collision if the enemy is walking and alive
-        if self.alive and self.animation_type == "walking":
+        if self.alive and self.animation_type == "walking": 
             colliding_turret = None
             # Calculate the enemy's current tile coordinates
             enemy_tile_x = int(self.pos.x // c.TILE_SIZE)

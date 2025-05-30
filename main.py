@@ -203,17 +203,21 @@ while run:
   #draw level
   world.draw(screen)
 
-  #draw groups
-  for turret in turret_group:
-    turret.draw(screen)
+  # Create a combined list of enemies and turrets for drawing order
+  all_sprites = sorted(list(enemy_group) + list(turret_group), key=lambda sprite: sprite.rect.bottom)
 
-  enemy_group.draw(screen)
-  for enemy in enemy_group:
-    enemy.draw_health_bar(screen)
+  # Draw all sprites based on their sorted order
+  for sprite in all_sprites:
+      if isinstance(sprite, Turret):
+          sprite.draw(screen)
+      elif isinstance(sprite, Enemy):
+          sprite.draw(screen)
+          sprite.draw_health_bar(screen) # Draw health bar on top of enemy
 
+  # Draw turret ranges (only if selected) - this should be on top of everything else except UI
   for turret in turret_group:
-    turret.draw(screen)
-  
+      turret.draw_range(screen)
+
   display_data()
 
   if game_over == False:
