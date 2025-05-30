@@ -39,20 +39,17 @@ class Turret(pg.sprite.Sprite):
     #update image
     self.angle = 90
     self.original_image = self.animation_list[self.frame_index]
-    self.image = pg.transform.rotate(self.original_image, self.angle)
-    self.rect = self.image.get_rect()
+    self.image = self.original_image
+    self.rect = self.image.get_rect(center=(self.x, self.y))
     self.rect.center = (self.x, self.y)
 
     #create transparent oval showing range
     self.ellipse_width_factor = 2.5
     self.ellipse_height_factor = 1.0
+    self.y_offset_oval = 0
 
     self.ellipse_width = int(self.range * self.ellipse_width_factor)
     self.ellipse_height = int(self.range * self.ellipse_height_factor)
-    self.y_offset_oval = int(self.range * 0.4)
-
-    surface_width = max(self.range * 2, self.ellipse_width + 20)
-    surface_height = max(self.range * 2, self.ellipse_height + self.y_offset_oval + 20)
 
     surface_width = max(self.range * 2, self.ellipse_width + 20)
     surface_height = max(self.range * 2, self.ellipse_height + self.y_offset_oval + 20)
@@ -62,7 +59,7 @@ class Turret(pg.sprite.Sprite):
     self.range_image.set_colorkey((0, 0, 0))
 
     ellipse_x_center_on_surface = surface_width // 2
-    ellipse_y_center_on_surface = (surface_height // 2) + self.y_offset_oval
+    ellipse_y_center_on_surface = surface_height // 2
 
     ellipse_rect = pg.Rect(ellipse_x_center_on_surface - self.ellipse_width // 2,
                            ellipse_y_center_on_surface - self.ellipse_height // 2,
@@ -71,7 +68,7 @@ class Turret(pg.sprite.Sprite):
 
     self.range_image.set_alpha(70)
     self.range_rect = self.range_image.get_rect()
-    self.range_rect.center = self.rect.center
+    self.range_rect.center = (self.rect.centerx, self.rect.centery + self.ellipse_height // 3)
 
   def load_images(self, sprite_sheet):
     #extract images from spritesheet
@@ -99,7 +96,7 @@ class Turret(pg.sprite.Sprite):
     for enemy in enemy_group:
         if enemy.health > 0:
             rel_x = enemy.pos[0] - self.x
-            rel_y = enemy.pos[1] - (self.y + self.y_offset_oval)
+            rel_y = enemy.pos[1] - self.y
 
             half_width = self.ellipse_width / 2
             half_height = self.ellipse_height / 2
@@ -118,7 +115,7 @@ class Turret(pg.sprite.Sprite):
     for enemy in enemy_group:
       if enemy.health > 0:
         rel_x = enemy.pos[0] - self.x
-        rel_y = enemy.pos[1] - (self.y + self.y_offset_oval)
+        rel_y = enemy.pos[1] - self.y
 
         half_width = self.ellipse_width / 2
         half_height = self.ellipse_height / 2
@@ -127,7 +124,7 @@ class Turret(pg.sprite.Sprite):
           if (rel_x / half_width)**2 + (rel_y / half_height)**2 <= 1:
                 self.target = enemy
                 self.angle = math.degrees(math.atan2(-rel_y, rel_x))
-                self.target.health -= c.DAMAGE
+                self.target.health -= self.damage
                 self.shot_fx.play()
                 break
 
@@ -156,7 +153,7 @@ class Turret(pg.sprite.Sprite):
     #upgrade range oval
     self.ellipse_width = int(self.range * self.ellipse_width_factor)
     self.ellipse_height = int(self.range * self.ellipse_height_factor)
-    self.y_offset_oval = int(self.range * 0.4)
+    self.y_offset_oval = 0
 
     surface_width = max(self.range * 2, self.ellipse_width + 20)
     surface_height = max(self.range * 2, self.ellipse_height + self.y_offset_oval + 20)
@@ -166,7 +163,7 @@ class Turret(pg.sprite.Sprite):
     self.range_image.set_colorkey((0, 0, 0))
 
     ellipse_x_center_on_surface = surface_width // 2
-    ellipse_y_center_on_surface = (surface_height // 2) + self.y_offset_oval
+    ellipse_y_center_on_surface = surface_height // 2
 
     ellipse_rect = pg.Rect(ellipse_x_center_on_surface - self.ellipse_width // 2,
                            ellipse_y_center_on_surface - self.ellipse_height // 2,
@@ -175,15 +172,19 @@ class Turret(pg.sprite.Sprite):
 
     self.range_image.set_alpha(70)
     self.range_rect = self.range_image.get_rect()
-    self.range_rect.center = self.rect.center
+    self.range_rect.center = (self.rect.centerx, self.rect.centery + self.ellipse_height // 2)
 
   def draw(self, surface):
     surface.blit(self.range_image, self.range_rect)
     self.image = self.original_image
-    self.rect = self.image.get_rect()
+    self.rect = self.image.get_rect(center=(self.x, self.y))
     self.rect.center = (self.x, self.y)
     surface.blit(self.image, self.rect)
     self.draw_health_bar(surface)
+
+  def draw_range(self, surface):
+    if self.selected:
+        surface.blit(self.range_image, self.range_rect)
 
   def draw_health_bar(self, surface):
     # Hitung rasio HP saat ini

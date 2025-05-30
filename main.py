@@ -190,6 +190,9 @@ while run:
   enemy_group.draw(screen)
   for enemy in enemy_group:
     enemy.draw_health_bar(screen)
+
+  for turret in turret_group:
+    turret.draw(screen)
   
   display_data()
 
