@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-input_root = "assets/images/palu"
+input_root = "assets/images/lalal"
 output_root = "assets/images/turrets"
 
 new_size = (96, 96)
