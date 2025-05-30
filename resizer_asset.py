@@ -1,10 +1,10 @@
 import os
 from PIL import Image
 
-input_root = "levels_Copy"
-output_root = "levels"
+input_root = "assets/images/palu"
+output_root = "assets/images/turrets"
 
-new_size = (720, 720)
+new_size = (96, 96)
 
 for dirpath, dirnames, filenames in os.walk(input_root):
     for filename in filenames:
