@@ -4,6 +4,7 @@ import json
 from enemy import Enemy
 from world import World
 from turret import Turret
+from bullet import Bullet # Import the new Bullet class
 from button import Button
 import constants as c
 
@@ -177,6 +178,10 @@ world.process_enemies()
 #create groups
 enemy_group = pg.sprite.Group()
 turret_group = pg.sprite.Group()
+bullet_group = pg.sprite.Group() # New: Bullet group
+
+# Add bullet_group to the world object for easier access
+world.bullet_group = bullet_group
 
 #create buttons
 turret_button = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_image, True)
@@ -208,7 +213,8 @@ while run:
 
     #update groups
     enemy_group.update(world, turret_group)
-    turret_group.update(enemy_group, world)
+    turret_group.update(enemy_group, world) # Pass world to turret update
+    bullet_group.update() # Update bullets
 
     #highlight selected turret
     if selected_turret:
@@ -221,16 +227,20 @@ while run:
   #draw level
   world.draw(screen)
 
-  # Create a combined list of enemies and turrets for drawing order
-  all_sprites = sorted(list(enemy_group) + list(turret_group), key=lambda sprite: sprite.rect.bottom)
+  # Create a combined list of sprites for drawing order
+  # This ensures enemies are drawn over the map, turrets over enemies (if applicable), and bullets over everything
+  all_sprites_for_drawing = sorted(list(enemy_group) + list(turret_group), key=lambda sprite: sprite.rect.bottom)
 
-  # Draw all sprites based on their sorted order
-  for sprite in all_sprites:
+  for sprite in all_sprites_for_drawing:
       if isinstance(sprite, Turret):
           sprite.draw(screen)
       elif isinstance(sprite, Enemy):
           sprite.draw(screen)
           sprite.draw_health_bar(screen)
+  
+  # Draw bullets on top of other game elements
+  bullet_group.draw(screen) # Draw bullets
+
 
   # Draw turret ranges (only if selected) - this should be on top of everything else except UI
   for turret in turret_group:
@@ -313,6 +323,7 @@ while run:
       #empty groups
       enemy_group.empty()
       turret_group.empty()
+      bullet_group.empty() # Clear bullets on restart
 
   #event handler
   for event in pg.event.get():

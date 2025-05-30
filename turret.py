@@ -4,6 +4,7 @@ import math
 import constants as c
 from turret_data import TURRET_DATA
 from enemy_data import ENEMY_DATA
+from bullet import Bullet # Import the new Bullet class
 
 class Turret(pg.sprite.Sprite):
     def __init__(self, sprite_sheets, tile_x, tile_y, shot_fx):
@@ -33,6 +34,9 @@ class Turret(pg.sprite.Sprite):
         self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
         self.frame_index = 0
         self.update_time = pg.time.get_ticks()
+
+        # Load bullet images based on turret level
+        self.bullet_images = self.load_bullet_images(self.upgrade_level) # New: Load bullet images
 
         #update image
         self.angle = 90
@@ -80,6 +84,19 @@ class Turret(pg.sprite.Sprite):
             animation_list.append(img)
         return animation_list
 
+    def load_bullet_images(self, level):
+        bullet_images = []
+        # Correctly map turret level to bullet folder name
+        bullet_folder_name = f"bullet{level}"
+        for i in range(5): # 5 frames (bt0.png to bt4.png)
+            img_path = f'assets/images/bullet_turrets/{bullet_folder_name}/bt{i}.png'
+            try:
+                img = pg.image.load(img_path).convert_alpha()
+                bullet_images.append(img)
+            except pg.error as e:
+                print(f"Error loading bullet image {img_path}: {e}")
+        return bullet_images
+
     def update(self, enemy_group, world):
         if self.health <= 0:
             self.kill()
@@ -87,10 +104,11 @@ class Turret(pg.sprite.Sprite):
         if self.target:
             self.play_animation()
         else:
+            # Only pick a target and shoot if cooldown is met and no target is selected
             if pg.time.get_ticks() - self.last_shot > (self.cooldown / world.game_speed):
-                self.pick_target(enemy_group)
+                self.pick_target(enemy_group, world.bullet_group) # Pass bullet_group here
 
-    def pick_target(self, enemy_group):
+    def pick_target(self, enemy_group, bullet_group): # Add bullet_group as a parameter
         for enemy in enemy_group:
             if enemy.health > 0:
                 rel_x = enemy.pos[0] - self.attack_origin_x
@@ -103,8 +121,11 @@ class Turret(pg.sprite.Sprite):
                     if (rel_x / half_width)**2 + (rel_y / half_height)**2 <= 1:
                         self.target = enemy
                         self.angle = math.degrees(math.atan2(-rel_y, rel_x))
-                        self.target.health -= self.damage
+                        # Instead of direct damage, create a bullet
+                        new_bullet = Bullet(self.bullet_images, self.target, self.rect.center, self.damage) # Pass self.damage
+                        bullet_group.add(new_bullet) # Add the new bullet to the bullet group
                         self.shot_fx.play()
+                        self.last_shot = pg.time.get_ticks() # Reset cooldown after shooting
                         break
 
     def play_animation(self):
@@ -114,8 +135,7 @@ class Turret(pg.sprite.Sprite):
             self.frame_index += 1
             if self.frame_index >= len(self.animation_list):
                 self.frame_index = 0
-                self.last_shot = pg.time.get_ticks()
-                self.target = None
+                self.target = None # Clear target after animation cycle
 
     def upgrade(self):
         self.upgrade_level += 1
@@ -125,6 +145,9 @@ class Turret(pg.sprite.Sprite):
         # Ensure the correct sprite_sheet is passed for the new upgrade level
         self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
         self.original_image = self.animation_list[self.frame_index]
+        
+        # Load new bullet images for the upgraded turret
+        self.bullet_images = self.load_bullet_images(self.upgrade_level) # New: Load bullet images for upgrade
 
         #upgrade range oval
         self.ellipse_width = int(self.range * self.ellipse_width_factor)
