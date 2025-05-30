@@ -1,10 +1,10 @@
 import os
 from PIL import Image
 
-input_root = "assets/images/lalal"
-output_root = "assets/images/turrets"
+input_root = "assets/images/bullets"
+output_root = "assets/images/bullet_turrets"
 
-new_size = (96, 96)
+new_size = (150, 150)
 
 for dirpath, dirnames, filenames in os.walk(input_root):
     for filename in filenames:

@@ -1,3 +1,4 @@
+# main.py
 import pygame as pg
 import json
 from enemy import Enemy
@@ -29,11 +30,31 @@ selected_turret = None
 map_image = pg.image.load('levels/level.png').convert_alpha()
 #turret spritesheets
 turret_spritesheets = []
-for x in range(1, c.TURRET_LEVELS + 1):
-  turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}/{3}.png').convert_alpha()
-  turret_spritesheets.append(turret_sheet)
+for level_num in range(1, c.TURRET_LEVELS + 1): # Loop untuk setiap level turret (1, 2, 3)
+    level_frames = []
+    for frame_num in range(1, c.TURRET_FRAMES + 1): # Loop untuk setiap frame (1 sampai 9)
+        # Konstruksi jalur file yang benar: assets/images/turrets/turret_X/t_Y (Y).png
+        img_path = f'assets/images/turrets/turret_{level_num}/t_1 ({frame_num}).png'
+        try:
+            img = pg.image.load(img_path).convert_alpha()
+            level_frames.append(img)
+        except pg.error as e:
+            print(f"Error loading image {img_path}: {e}")
+    if level_frames: # Hanya tambahkan jika frame berhasil dimuat
+        turret_spritesheets.append(level_frames)
+    else:
+        print(f"Warning: No frames loaded for turret level {level_num}. Check image paths.")
+
 #individual turret image for mouse cursor
-cursor_turret = pg.image.load('assets/images/turrets/cursor_turret.png').convert_alpha()
+# Ambil frame pertama dari turret level 1 sebagai gambar kursor
+cursor_turret = None
+if turret_spritesheets and turret_spritesheets[0]:
+    cursor_turret = turret_spritesheets[0][0] # Ambil frame pertama dari turret level 1
+else:
+    # Fallback jika tidak ada gambar turret yang dimuat
+    print("Warning: Could not load cursor_turret image. Check turret image paths.")
+    cursor_turret = pg.Surface((c.TILE_SIZE, c.TILE_SIZE), pg.SRCALPHA) # Buat permukaan kosong
+    pg.draw.rect(cursor_turret, (255, 255, 0), cursor_turret.get_rect(), 2) # Gambar persegi panjang kuning sebagai placeholder
 #enemies
 enemy_images = {
   "weak": { "walking": [], "dying": [], "slashing": [] },
@@ -64,9 +85,9 @@ def load_enemy_animations(enemy_type_key, folder_prefix, num_walking_frames, num
 
 # Load animations for each enemy type with their specific frame counts
 # YOU MUST CHANGE THESE TO YOUR ACTUAL FRAME COUNTS IF THEY ARE DIFFERENT
-load_enemy_animations("weak", "enemy_1", 24, 10, 8) # Example: 24 walking, 10 dying, 8 slashing
-load_enemy_animations("medium", "enemy_2", 24, 12, 10) # Example: 24 walking, 12 dying, 10 slashing
-load_enemy_animations("strong", "enemy_3", 24, 15, 12) # Example: 24 walking, 15 dying, 12 slashing
+load_enemy_animations("weak", "enemy_1", 24, 10, 8)
+load_enemy_animations("medium", "enemy_2", 24, 12, 10)
+load_enemy_animations("strong", "enemy_3", 24, 15, 12)
 
 
 #buttons
@@ -116,29 +137,26 @@ def create_turret(mouse_pos):
   mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
   # Periksa apakah posisi mouse berada dalam batas layar game area
   if mouse_tile_x < 0 or mouse_tile_x >= c.COLS or mouse_tile_y < 0 or mouse_tile_y >= c.ROWS:
-    return False # Jika di luar area game, jangan lakukan apa-apa
+    return False
   if True:
     #check that there isn't already a turret there
     space_is_free = True
     for turret in turret_group:
-      # Check if the exact tile is occupied
       if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
         space_is_free = False
-        break # Keluar dari loop jika sudah ditemukan turret di lokasi yang sama
-        # Check for horizontal adjacency (1 tile gap)
-      if mouse_tile_y == turret.tile_y: # Only check if they are on the same row
-        if abs(mouse_tile_x - turret.tile_x) <= 1: # If the horizontal distance is 0 or 1
+        break
+      if mouse_tile_y == turret.tile_y:
+        if abs(mouse_tile_x - turret.tile_x) <= 1:
           space_is_free = False
-          break # Keluar dari loop jika terlalu dekat secara horizontal
+          break
 
-    #if it is a free space then create turret
     if space_is_free == True:
       new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y, shot_fx)
       turret_group.add(new_turret)
       #deduct cost of turret
       world.money -= c.BUY_COST
-      return True # Turret berhasil dibuat
-  return False # Turret tidak dibuat (misalnya karena lokasi tidak valid atau ada turret lain di dekatnya)
+      return True
+  return False
 
 def select_turret(mouse_pos):
   mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
@@ -189,7 +207,7 @@ while run:
       game_outcome = 1 #win
 
     #update groups
-    enemy_group.update(world, turret_group) # Pass turret_group to enemy for slashing logic
+    enemy_group.update(world, turret_group)
     turret_group.update(enemy_group, world)
 
     #highlight selected turret
@@ -212,7 +230,7 @@ while run:
           sprite.draw(screen)
       elif isinstance(sprite, Enemy):
           sprite.draw(screen)
-          sprite.draw_health_bar(screen) # Draw health bar on top of enemy
+          sprite.draw_health_bar(screen)
 
   # Draw turret ranges (only if selected) - this should be on top of everything else except UI
   for turret in turret_group:
